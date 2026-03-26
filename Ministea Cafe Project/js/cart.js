@@ -10,7 +10,6 @@ function renderCart() {
     const body   = document.getElementById('cartDrawerBody');
     const footer = document.getElementById('cartDrawerFooter');
     const badge  = document.getElementById('cartBadge');
-    if (!body || !footer) return;
 
     const totalItems = window.cart.reduce((sum, i) => sum + i.qty, 0);
     const totalPrice = window.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
@@ -20,6 +19,8 @@ function renderCart() {
         badge.textContent = totalItems;
         badge.classList.toggle('has-items', totalItems > 0);
     }
+
+    if (!body || !footer) return;
 
     // Empty state
     if (window.cart.length === 0) {
@@ -81,6 +82,7 @@ window.addToCart = function(name, category, price) {
 
 // --- CHANGE QTY ---
 window.changeQty = function(idx, delta) {
+    if (!window.cart[idx]) return;
     window.cart[idx].qty += delta;
     if (window.cart[idx].qty <= 0) window.cart.splice(idx, 1);
     renderCart();
@@ -100,13 +102,21 @@ window.clearCart = function() {
 
 // --- DRAWER OPEN / CLOSE ---
 function openCart() {
-    document.getElementById('cartDrawer').classList.add('open');
-    document.getElementById('cartOverlay').classList.add('open');
+    const drawer = document.getElementById('cartDrawer');
+    const overlay = document.getElementById('cartOverlay');
+    if (!drawer || !overlay) return;
+
+    drawer.classList.add('open');
+    overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
 }
 function closeCart() {
-    document.getElementById('cartDrawer').classList.remove('open');
-    document.getElementById('cartOverlay').classList.remove('open');
+    const drawer = document.getElementById('cartDrawer');
+    const overlay = document.getElementById('cartOverlay');
+    if (!drawer || !overlay) return;
+
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
     document.body.style.overflow = '';
 }
 
@@ -131,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('cartToggleBtn')?.addEventListener('click', () => {
         const drawer = document.getElementById('cartDrawer');
+        if (!drawer) return;
         drawer.classList.contains('open') ? closeCart() : openCart();
     });
 

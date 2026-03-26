@@ -1,35 +1,156 @@
-<div class="image-header">
-    <img src="images/header.png" class="img-fluid w-100" alt="Ministea Cafe Header">
-</div>
-<div class="menu-header">
-    <div class="menu-title">Menu</div>
-    <div class="menu-choices-container">
-        <div class="menu-choices">
-            <a href="#" data-category="drinks" class="menu-tab active">Drinks</a>
-            <a href="#" data-category="pastries" class="menu-tab">Pastries</a>
-            <a href="#" data-category="light-meals" class="menu-tab">Light Meals</a>
-            <a href="#" data-category="desserts" class="menu-tab">Desserts</a>
-            <a href="#" data-category="snacks" class="menu-tab">Snacks</a>
-        </div>
-    </div>
-</div>
+const menuData = {
+    drinks: {
+        'Iced Coffee':       ['Iced Americano','Iced Latte','Iced Mocha','Cold Brew','Iced Cappuccino'],
+        'Hot Coffee':        ['Espresso','Americano','Cappuccino','Latte','Macchiato'],
+        'Non Coffee':        ['Hot Chocolate','Matcha Latte','Chai Latte','Milk Tea','Milo'],
+        'Fresh and Cold':    ['Fresh Lemonade','Iced Tea','Fruit Shake','Smoothie','Acai Bowl'],
+        'Tea and Infusions': ['Green Tea','Black Tea','Herbal Tea','Chamomile','Peppermint']
+    },
+    pastries: {
+        'Puff Pastry':      ['Croissant','Danish','Apple Turnover','Cheese Puff','Almond Croissant'],
+        'Shortcrust Pastry':['Apple Pie','Lemon Tart','Quiche','Jam Tart','Custard Tart'],
+        'Choux Pastry':     ['Eclair','Profiterole','Cream Puff','Paris Brest','Choux au Craquelin'],
+        'Phyllo Pastry':    ['Baklava','Spanakopita','Apple Strudel','Tiropita','Borek'],
+        'Flaky Pastry':     ['Pain au Chocolat','Raisin Roll','Cheese Stick','Ham & Cheese','Cinnamon Roll']
+    },
+    'light-meals': {
+        'Sandwiches': ['Club Sandwich','BLT','Tuna Melt','Chicken Caesar','Veggie Wrap'],
+        'Pasta':      ['Carbonara','Aglio Olio','Pesto Pasta','Marinara','Alfredo'],
+        'Rice Meals': ['Chicken Adobo','Pork BBQ','Beef Salpicao','Chicken Teriyaki','Fried Rice'],
+        'Salads':     ['Caesar Salad','Greek Salad','Garden Salad','Cobb Salad','Quinoa Salad'],
+        'All day meals': ['Chicken & Rice','Pork Steak','Fish Fillet','Burger Steak','Sisig']
+    },
+    desserts: {
+        'Cakes':     ['Chocolate Cake','Red Velvet','Cheesecake','Carrot Cake','Tiramisu'],
+        'Ice Cream': ['Vanilla Scoop','Chocolate Scoop','Matcha Scoop','Mango Scoop','Sundae'],
+        'Waffles':   ['Classic Waffle','Chocolate Waffle','Berry Waffle','Ice Cream Waffle','Nutella Waffle'],
+        'Pancakes':  ['Classic Pancakes','Blueberry Pancakes','Banana Pancakes','Oreo Pancakes','Matcha Pancakes'],
+        'Crepe':     ['Nutella Crepe','Lemon Crepe','Berry Crepe','Banana Crepe','Ice Cream Crepe']
+    },
+    snacks: {
+        'Fries':          ['Classic Fries','Truffle Fries','Cheese Fries','Sweet Potato Fries','Loaded Fries'],
+        'Nachos':         ['Classic Nachos','Cheese Nachos','Guacamole Nachos','Chili Nachos','Supreme Nachos'],
+        'Chicken Wings':  ['Buffalo Wings','Honey Garlic','Spicy BBQ','Teriyaki Wings','Lemon Pepper'],
+        'Mozzarella':     ['Mozzarella Sticks','Mozzarella Bites','Mozzarella Balls','Mozzarella Skins','Mozzarella Wedges'],
+        'Mini Burgers':   ['Classic Slider','Cheese Slider','BBQ Slider','Teriyaki Slider','Mushroom Slider']
+    }
+};
 
-<div class="allergen py-4">
-    We cannot guarantee that any of our products are <em>free from allergens</em> as we use shared equipment to store, prepare, and serve them.
-</div>
-<div class="container py-5">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="sidebar px-4 py-4">
-                <div class="loading text-center py-5 text-muted">Loading...</div>
-            </div>
-        </div>
-        <div class="col-md-9">
-            <div id="menu-content" class="menu-content">
-                <div class="loading-content text-center py-5 text-muted">
-                    Select a category to view menu
+// Sample prices per category type
+const categoryPrices = {
+    drinks: [89, 99, 109, 119, 129],
+    pastries: [69, 79, 89, 99, 109],
+    'light-meals': [129, 149, 159, 169, 179],
+    desserts: [89, 99, 109, 119, 129],
+    snacks: [79, 89, 99, 109, 119]
+};
+
+window.initMenu = function() {
+    const sidebar      = document.querySelector('.sidebar');
+    const menuContent  = document.getElementById('menu-content');
+    const menuTabs     = document.querySelectorAll('.menu-tab');
+    let currentCategory    = 'drinks';
+    let currentSubcategory = null;
+
+    function updateSidebar(category) {
+        sidebar.innerHTML = `<h4>${formatCategoryName(category)}</h4>`;
+        Object.keys(menuData[category]).forEach(subcategory => {
+            const link = document.createElement('a');
+            link.href = '#';
+            link.textContent = subcategory;
+            link.dataset.subcategory = subcategory;
+            sidebar.appendChild(link);
+        });
+        // Activate first
+        sidebar.querySelectorAll('a')[0]?.classList.add('active');
+    }
+
+    function loadSubcategoryContent(subcategory) {
+        const products = menuData[currentCategory][subcategory];
+        const prices   = categoryPrices[currentCategory] || [99,109,119,129,139];
+        menuContent.innerHTML = generateProductsHTML(subcategory, products, prices);
+    }
+
+    function generateProductsHTML(subcategory, products, prices) {
+        return `
+            <div class="menu-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="section-title mb-0">${subcategory}</h5>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="row g-4">
+                    ${products.map((product, index) => `
+                        <div class="col-md-6 col-lg-4 product-item">
+                            <div class="menu-product-card">
+                                <div class="drink-img">
+                                    <i class="fas fa-mug-hot"></i>
+                                </div>
+                                <div class="drink-name">${product}</div>
+                                <div class="drink-price">₱${prices[index] ?? 99}</div>
+                                <button class="btn-cart w-100"
+                                    data-name="${product}"
+                                    data-category="${subcategory}"
+                                    data-price="${prices[index] ?? 99}">
+                                    <i class="fas fa-plus"></i> Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+    }
+
+    function formatCategoryName(category) {
+        return category.charAt(0).toUpperCase() + category.replace('-', ' ').slice(1);
+    }
+
+    function bindCartButtons() {
+        document.querySelectorAll('.btn-cart').forEach(btn => {
+            btn.onclick = function() {
+                const name     = this.dataset.name;
+                const category = this.dataset.category;
+                const price    = parseFloat(this.dataset.price);
+                if (typeof window.addToCart === 'function') {
+                    window.addToCart(name, category, price);
+                }
+                // Button feedback
+                this.innerHTML = '<i class="fas fa-check"></i> Added!';
+                this.classList.add('added');
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-plus"></i> Add to Cart';
+                    this.classList.remove('added');
+                }, 1500);
+            };
+        });
+    }
+
+    menuTabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            menuTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentCategory = this.dataset.category;
+            updateSidebar(currentCategory);
+            const firstSub = Object.keys(menuData[currentCategory])[0];
+            currentSubcategory = firstSub;
+            loadSubcategoryContent(firstSub);
+            bindCartButtons();
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        const sideLink = e.target.closest('.sidebar a');
+        if (sideLink) {
+            e.preventDefault();
+            document.querySelectorAll('.sidebar a').forEach(l => l.classList.remove('active'));
+            sideLink.classList.add('active');
+            currentSubcategory = sideLink.textContent.trim();
+            loadSubcategoryContent(currentSubcategory);
+            bindCartButtons();
+        }
+    });
+
+    // Init
+    updateSidebar('drinks');
+    loadSubcategoryContent('Iced Coffee');
+    bindCartButtons();
+};
